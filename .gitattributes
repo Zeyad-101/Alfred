@@ -1,0 +1,17 @@
+# Normalize line endings so Windows and Linux contributors don't
+# produce whole-file diffs. Text files are stored LF in the repo and
+# checked out with the platform's native endings.
+* text=auto
+
+*.py   text diff=python
+*.md   text
+*.txt  text
+*.iss  text
+*.spec text diff=python
+*.json text
+
+# Binary assets -- never touch, never try to diff.
+*.png  binary
+*.ico  binary
+*.db   binary
+*.exe  binary

@@ -1,0 +1,9 @@
+# Runtime dependencies -- everything `python main.py` needs.
+PySide6
+markdown
+keyboard
+# Optional fallback for the global hotkey: `ui/hotkey.py` tries the
+# `keyboard` library first and falls back to `pynput` if it cannot
+# install its hook (which happens on some locked-down Windows setups).
+# Imported lazily, so the app still runs without it.
+pynput

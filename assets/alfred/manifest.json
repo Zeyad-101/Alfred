@@ -1,0 +1,27 @@
+{
+  "name": "Alfred",
+  "states": {
+    "idle": {
+      "frames": 8,
+      "interval_ms": 120,
+      "loop": true
+    },
+    "thinking": {
+      "frames": 12,
+      "interval_ms": 110,
+      "loop": true
+    },
+    "greeting": {
+      "frames": 8,
+      "interval_ms": 115,
+      "loop": false
+    }
+  },
+  "size": [
+    160,
+    160
+  ],
+  "source": "source/alfred_base.png",
+  "generator": "assets/generate_alfred_frames.py",
+  "notes": "Poses are derived from the single source drawing by cutting it into head/torso/napkin/legs layers and transforming each about its own seam. No running, walking, sleeping or jumping states."
+}

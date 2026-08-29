@@ -1,0 +1,17 @@
+# Development and build-time only -- not needed to run Alfred from source.
+#
+#   pip install -r requirements-dev.txt
+#
+# PyInstaller packages the app into `dist/Alfred.exe` (see BUILD.md).
+pyinstaller
+# Pillow is used by the two art tools under `assets/`:
+#   assets/build_icon.py           -> icon.ico
+#   assets/generate_alfred_frames.py -> assets/alfred/frames/
+# Both outputs are checked in, so packaging does not need Pillow --
+# only regenerating the art does.
+Pillow
+# pytest runs the suite in `tests/` (see pytest.ini). The suite reads the
+# real screen's geometry in tests/test_bubble_from_sprite.py, so run it
+# without QT_QPA_PLATFORM=offscreen:
+#   python -m pytest
+pytest
