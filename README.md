@@ -83,3 +83,7 @@ Then double-click `dist/Alfred.exe`. No Python install required on the target ma
 ## Day 30/30
 
 This is the last day of the 30 Days / 30 Projects challenge. The project started as a plain SQLite schema and grew one feature at a time -- CLI, then Qt UI, then search, then projects and links, then settings, then the mascot, then a packaged .exe. Every layer added a clear, testable boundary (a `core/` module, a `ui/` widget, or a one-line config in `requirements.txt`), which made the codebase relatively painless to extend incrementally.
+
+## License
+
+MIT -- see [LICENSE](LICENSE). Copyright (c) 2026 Zeyad Waled.
