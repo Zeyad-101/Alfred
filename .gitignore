@@ -60,9 +60,3 @@ Thumbs.db
 desktop.ini
 Desktop.ini
 $RECYCLE.BIN/
-
-# --- Local agent / assistant tooling ----------------------------------
-# Machine-local skill and agent configuration, not part of the app.
-.claude/
-.agents/
-skills-lock.json

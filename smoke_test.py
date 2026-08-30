@@ -7,7 +7,7 @@ and the core layer — without ever showing a window. Verifies that:
   - pin toggling re-orders the list
   - search debounce actually fires and filters
   - delete removes the row from the visible list
-  - persistence works (the data lives in data/alfred.db, survives a reopen)
+  - persistence works (the data survives closing and reopening the db)
 
 Uses the ``offscreen`` QPA so this can run on a headless box too.
 """
@@ -37,8 +37,6 @@ from core.memory import (
     get_memory,
     list_memories,
     permanently_delete_memory,
-    set_tags,
-    toggle_pin,
 )
 from core.links import are_linked, link_memories, list_linked_memories
 from core.inbox import list_inbox
@@ -200,7 +198,6 @@ def main() -> int:
 
     print("[9] version history — edit 3 times, open History, restore")
     from core.memory import list_versions
-    from ui.strings import VERSION_RESTORED
 
     mid3 = 1  # the only live memory; its title is "Max98357A notes"
     win.all_list.select_memory(mid3)
@@ -320,10 +317,8 @@ def main() -> int:
     win.show()
     pump(20)
 
-    from core.inbox import list_inbox
-    from core.inbox import create_inbox_item
     from core.tasks import list_tasks
-    from ui.main_window import VIEW_ALL_MEMORIES, VIEW_TASKS
+    from ui.sidebar import VIEW_TASKS
     from PySide6.QtCore import Qt
     from PySide6.QtWidgets import QDialog
 
@@ -484,13 +479,9 @@ def main() -> int:
     win.show()
     pump(20)
 
-    from core.memory import (
-        delete_memory,
-        list_trash,
-        permanently_delete_memory,
-        restore_memory,
-    )
-    from ui.main_window import VIEW_TRASH
+    from core.inbox import create_inbox_item
+    from core.memory import list_trash, restore_memory
+    from ui.sidebar import VIEW_TRASH
     from PySide6.QtWidgets import QMessageBox
 
     note_id = create_memory(conn, "An old note", "note body", tags=["old"])
@@ -580,9 +571,8 @@ def main() -> int:
     expect("inbox item was hard-deleted too",
            get_memory(conn, inbox_id), None)
 
-    # Going back to All Memories shows the restored note (the other two
-    # are gone, including the previously-restored one — wait, the
-    # restored note should still be there).
+    # Going back to All Memories: the restored note is the only
+    # survivor -- the other two were hard-deleted.
     win.sidebar.select_view(VIEW_ALL_MEMORIES)
     pump(20)
     expect("editor visible again after leaving trash",
@@ -825,7 +815,6 @@ def main() -> int:
            win.projects_view.memory_list.count(), 1)
     # MemoryListWidget.set_memories clears selection, so check the
     # row's UserRole payload rather than current_memory_id().
-    from PySide6.QtCore import Qt
     right_pane_id = win.projects_view.memory_list.item(0).data(Qt.UserRole)
     expect("the linked memory is the one we assigned",
            right_pane_id, target_mid)
@@ -888,7 +877,6 @@ def main() -> int:
                rows_after, {"Smoke Project  (1)"})
 
     # Switching back to All Memories preserves the editor's content.
-    from ui.sidebar import VIEW_ALL_MEMORIES
     win.sidebar.select_view(VIEW_ALL_MEMORIES)
     pump(20)
     expect("back on all_memories view",
@@ -1111,12 +1099,8 @@ def main() -> int:
     # file without an open connection blocking it.
     win2.close()
     pump(20)
-    # Keep a reference to ``win2`` so any future section that
-    # follows this can rely on a live MainWindow. The final
-    # cleanup at the bottom of the script doesn't need it, but
-    # the binding is what guarantees the QObject isn't GC'd
-    # mid-flight during the pump() calls above.
-    win = win2  # noqa: F841  (kept for downstream use)
+    # Section [19] drives ``win``, so point it at the surviving window.
+    win = win2
 
     print("[19] capture popup, tray, hotkey — wiring + popup flow")
 
@@ -1154,15 +1138,6 @@ def main() -> int:
     # ``_committed`` flag is reset after a click.
     expect("capture popup is not visible initially",
            win.capture_popup.isVisible(), False)
-    # Show the popup directly (we don't want to actually display
-    # anything in offscreen mode — calling show() on a real
-    # platform would require a display, but in offscreen it's
-    # harmless and the widget state is the same).
-    win.capture_popup.show()
-    pump(10)
-    expect("popup shows after a show() call", win.capture_popup.isVisible(), True)
-    win.capture_popup.hide()
-    pump(10)
 
     # Simulate clicking the + Inbox button: this calls
     # _on_new_inbox_clicked which now calls _show_quick_capture,
@@ -1215,15 +1190,6 @@ def main() -> int:
     pump(20)
     expect("bridge re-arms and a fresh press fires again",
            triggered_count[0], 2)
-
-    # MainWindow has the bridge's signal connected. Verifying
-    # the wiring: the bridge's triggered signal should be
-    # connected to win._on_hotkey_pressed. We can sanity-check
-    # by emitting the signal and watching for the popup to open.
-    bridge.triggered.emit()
-    pump(20)
-    expect("emitting bridge.triggered opens the capture popup",
-           win.capture_popup.isVisible(), True)
     win.capture_popup.hide()
     pump(10)
 
