@@ -555,19 +555,23 @@ def test_apply_theme_applies_dark_with_no_argument(qapp):
     future tweaks to the QSS don't make the test brittle.
     The Phase 17 polish pass rebalanced the palette into
     three tiers; we assert on the deepest tier (window
-    background) rather than the old single-color value.
+    background) rather than the old single-color value. The
+    tier values themselves are read from the theme module
+    rather than spelled out here — the first version pasted
+    the hex literals in, which made a repaint of the palette
+    look like a broken test rather than like a repaint.
     """
-    from ui.theme import DARK_QSS, apply_theme
+    from ui.theme import _ACCENT, _BG_WINDOW, DARK_QSS, apply_theme
 
     apply_theme()
     sheet = qapp.styleSheet()
     # A distinctive fragment of the dark palette — the window
     # background color — must be present.
-    assert "background-color: #1f2227" in sheet
+    assert f"background-color: {_BG_WINDOW}" in sheet
     # The accent (butler gold) must also be present — the
     # polish pass introduced it as a unifying selection /
     # primary-action color.
-    assert "#c9a14a" in sheet
+    assert _ACCENT in sheet
     # And the sheet should be a superset of the bundled QSS
     # (Qt may add nothing on top; that's still a superset).
     assert DARK_QSS.strip() in sheet or sheet.strip() == DARK_QSS.strip()

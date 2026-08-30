@@ -171,9 +171,11 @@ class TrashView(QWidget):
         left = QWidget()
         left_layout = QVBoxLayout(left)
         left_layout.setContentsMargins(0, 0, 0, 0)
-        left_layout.setSpacing(4)
+        left_layout.setSpacing(8)
 
         self.empty_btn = QPushButton(TRASH_EMPTY_BTN)
+        # Destructive: this one empties the trash for good.
+        self.empty_btn.setObjectName("dangerButton")
         self.empty_btn.setEnabled(False)  # until items arrive
         left_layout.addWidget(self.empty_btn)
 
@@ -188,7 +190,7 @@ class TrashView(QWidget):
         right = QWidget()
         right_layout = QVBoxLayout(right)
         right_layout.setContentsMargins(0, 0, 0, 0)
-        right_layout.setSpacing(4)
+        right_layout.setSpacing(8)
 
         self.preview = QTextEdit()
         self.preview.setReadOnly(True)
@@ -203,6 +205,8 @@ class TrashView(QWidget):
         action_row.addStretch()
 
         self.delete_perm_btn = QPushButton(DELETE_PERMANENTLY)
+        # Destructive, and unlike the trash itself there is no undo.
+        self.delete_perm_btn.setObjectName("dangerButton")
         self.delete_perm_btn.setEnabled(False)
         action_row.addWidget(self.delete_perm_btn)
         right_layout.addLayout(action_row)

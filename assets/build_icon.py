@@ -80,10 +80,16 @@ SIMPLIFY_AT_OR_BELOW = 32
 SUPERSAMPLE = 8
 
 # --- palette (kept in step with ui/theme.py) ---------------------------
-PLATE = (38, 42, 49, 255)        # a touch above _BG_WINDOW so a pure
-                                 # black taskbar doesn't swallow it
-RIM = (201, 161, 74, 255)        # _ACCENT
-MONOGRAM = (201, 161, 74, 255)   # _ACCENT
+# The plate used to be (38, 42, 49) -- a cool slate keyed to the old
+# window tier. It kept the same brightness as the theme's warm repaint
+# but not the same hue, which is very visible when the taskbar button
+# sits next to the window it opens. (37, 32, 25) is _BG_INPUT: the same
+# *value* as the old plate, so nothing about how the icon holds up
+# against an arbitrary wallpaper changes -- only the hue moves.
+PLATE = (37, 32, 25, 255)        # _BG_INPUT -- above _BG_WINDOW so a
+                                 # pure black taskbar doesn't swallow it
+RIM = (201, 162, 75, 255)        # _ACCENT
+MONOGRAM = (201, 162, 75, 255)   # _ACCENT
 
 # Geometry, as fractions of the icon's edge.
 CORNER_RADIUS_PCT = 0.22

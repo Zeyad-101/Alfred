@@ -83,7 +83,7 @@ class Sidebar(QWidget):
     def _build_ui(self) -> None:
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(2)
+        layout.setSpacing(0)
 
         self.list = QListWidget()
         # The theme keys sidebar-specific styles off this

@@ -83,6 +83,7 @@ from ui.strings import (
     TITLE_LABEL,
     TITLE_REQUIRED,
 )
+from ui.theme import MARKDOWN_PREVIEW_QSS
 
 
 class _ConvertToTaskDialog(QDialog):
@@ -155,14 +156,11 @@ class _RelatedChip(QWidget):
         layout.setSpacing(4)
 
         self.title_label = QLabel(title)
-        # Visual chip treatment without a custom QSS class -- a thin
-        # border plus a slight background tint reads as a chip
-        # without dragging the rest of the editor's look into a
-        # different palette.
-        self.title_label.setStyleSheet(
-            "QLabel { padding: 2px 8px; border: 1px solid #bbb;"
-            "         border-radius: 9px; background: #f4f4f4; }"
-        )
+        # The chip treatment (tinted fill, hairline border, control
+        # radius) lives in the theme under ``chipLabel``. It used to be
+        # three hardcoded light-grey values right here, which is how a
+        # dark app ends up with one #f4f4f4 pill in the middle of it.
+        self.title_label.setObjectName("chipLabel")
         # Clickable cue without changing the cursor globally.
         self.title_label.setCursor(Qt.PointingHandCursor)
         self.title_label.mouseReleaseEvent = self._on_label_clicked  # type: ignore[method-assign]
@@ -230,7 +228,7 @@ class _AddRelatedDialog(QDialog):
         # doesn't have a stranded label.
         self.empty_label = QLabel(RELATED_NO_MATCHES)
         self.empty_label.setAlignment(Qt.AlignCenter)
-        self.empty_label.setStyleSheet("color: #888;")
+        self.empty_label.setObjectName("muted")
         self.empty_label.hide()
         layout.addWidget(self.empty_label)
 
@@ -540,7 +538,7 @@ class EditorPanel(QWidget):
         form.addRow(TITLE_LABEL, self.title_input)
 
         self.title_error = QLabel("")
-        self.title_error.setStyleSheet("color: #c0392b; font-size: 11px;")
+        self.title_error.setObjectName("errorLabel")
         self.title_error.setVisible(False)
         form.addRow("", self.title_error)
 
@@ -593,7 +591,7 @@ class EditorPanel(QWidget):
         self.related_chips_box = QWidget()
         self.related_chips_layout = QVBoxLayout(self.related_chips_box)
         self.related_chips_layout.setContentsMargins(0, 0, 0, 0)
-        self.related_chips_layout.setSpacing(2)
+        self.related_chips_layout.setSpacing(4)
         # ``addStretch`` keeps the chips top-aligned even when the
         # container has more vertical room than the chips need.
         self.related_chips_layout.addStretch()
@@ -605,7 +603,7 @@ class EditorPanel(QWidget):
         # header, NOT inside the chips box, so the chips box can
         # collapse to zero height without taking the label with it.
         self.related_empty_label = QLabel(RELATED_EMPTY)
-        self.related_empty_label.setStyleSheet("color: #888; font-style: italic;")
+        self.related_empty_label.setObjectName("noteLabel")
         self.related_empty_label.setVisible(True)
         related_outer.addWidget(self.related_empty_label)
 
@@ -641,21 +639,15 @@ class EditorPanel(QWidget):
 
         self.preview_view = QTextBrowser()
         self.preview_view.setOpenLinks(False)  # we handle clicks via QDesktopServices
-        # Stylesheet scopes the visual change to code blocks (a
-        # background tint and monospace font) without touching
-        # any other element. Inline-style HTML would be more
-        # invasive; a QSS is the minimum-fuss route.
-        self.preview_view.setStyleSheet(
-            "QTextBrowser { font-size: 13px; }"
-            "pre { background-color: #f4f4f4; padding: 8px;"
-            "      border-radius: 4px;"
-            "      font-family: 'Consolas', 'Monaco', monospace; }"
-            "code { background-color: #f4f4f4; padding: 1px 4px;"
-            "       border-radius: 3px;"
-            "       font-family: 'Consolas', 'Monaco', monospace; }"
-            "table { border-collapse: collapse; }"
-            "th, td { border: 1px solid #ccc; padding: 4px 8px; }"
-        )
+        # Code blocks, tables and links in rendered markdown are styled
+        # from the theme's ``MARKDOWN_PREVIEW_QSS``. Two things were wrong
+        # with doing it here: the values were the app's last light-theme
+        # leftovers (#f4f4f4 blocks, #ccc rules -- fine on white, a hole
+        # in a dark note), and they were set as a *widget* stylesheet,
+        # where the ``pre``/``code``/``td`` selectors never reached the
+        # HTML at all. A QTextDocument default stylesheet is the surface
+        # that actually styles rich text.
+        self.preview_view.document().setDefaultStyleSheet(MARKDOWN_PREVIEW_QSS)
         self.preview_view.anchorClicked.connect(self._on_anchor_clicked)
         self.content_stack.addWidget(self.preview_view)
 
@@ -725,7 +717,7 @@ class EditorPanel(QWidget):
         layout.addLayout(button_row)
 
         self.timestamps_label = QLabel("")
-        self.timestamps_label.setStyleSheet("color: #888; font-size: 11px;")
+        self.timestamps_label.setObjectName("microLabel")
         self.timestamps_label.setVisible(False)
         layout.addWidget(self.timestamps_label)
 

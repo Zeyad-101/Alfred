@@ -228,7 +228,7 @@ class DashboardView(QWidget):
         # card so it fills the available vertical space;
         # the header and stats row stay at the top.
         outer = QVBoxLayout(self)
-        outer.setContentsMargins(20, 20, 20, 20)
+        outer.setContentsMargins(16, 16, 16, 16)
         outer.setSpacing(16)
 
         # Header: greeting + subhead. The greeting is the
@@ -236,7 +236,7 @@ class DashboardView(QWidget):
         # invitation the rest of the app uses when the
         # DB is empty.
         header_box = QVBoxLayout()
-        header_box.setSpacing(2)
+        header_box.setSpacing(4)
         self.greeting_label = QLabel(self._greeting)
         # The display step -- the top of the type scale, and the
         # only widget in the app that uses it. Was an inline 20pt.
@@ -283,7 +283,7 @@ class DashboardView(QWidget):
         # already provides the breathing room, so layout
         # margins on top of it would double-space the
         # contents away from the border.
-        tasks_box.setContentsMargins(4, 2, 4, 2)
+        tasks_box.setContentsMargins(4, 4, 4, 4)
         tasks_box.setSpacing(8)
         tasks_header = QLabel(DASHBOARD_TASKS_TODAY_HEADER)
         tasks_header.setObjectName("sectionHeader")

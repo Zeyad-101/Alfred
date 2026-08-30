@@ -36,15 +36,18 @@ from PySide6.QtGui import (
 )
 
 from core.paths import asset_path
+from ui.theme import _ACCENT, _BG_PANEL
 
 # The icon file, relative to the project root (and to the unpacked
 # bundle root -- ``asset_path`` handles both).
 _ICON_REL = "icon.ico"
 
-# Fallback colors, matching ``assets/build_icon.py``. Only reached
-# if the .ico is missing, which in a correct build it never is.
-_PLATE = "#262a31"
-_RIM = "#c9a14a"
+# Fallback colors. Only reached if the .ico is missing, which in a
+# correct build it never is -- but a fallback that is off-palette is a
+# fallback nobody notices is being used, so these are the theme's panel
+# tier and its accent rather than two hand-picked near-misses.
+_PLATE = _BG_PANEL
+_RIM = _ACCENT
 
 _CACHE: QIcon | None = None
 

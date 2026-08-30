@@ -226,6 +226,10 @@ class SettingsDialog(QDialog):
         # Body row: left category list + right stacked pages.
         body_row = QHBoxLayout()
         self._category_list = QListWidget()
+        # This is navigation, not content: the theme styles it with the
+        # same restrained "you are here" treatment as the main window's
+        # sidebar rather than the strong selection content lists use.
+        self._category_list.setObjectName("categoryList")
         self._category_list.setFixedWidth(160)
         for label in (
             SETTINGS_CATEGORY_GENERAL,
@@ -256,6 +260,11 @@ class SettingsDialog(QDialog):
         button_box = QDialogButtonBox(
             QDialogButtonBox.Save | QDialogButtonBox.Cancel
         )
+        # Save is this dialog's primary action, so it wears the same gold
+        # fill the editor's Save does -- purely a stylesheet hook.
+        _save_btn = button_box.button(QDialogButtonBox.Save)
+        if _save_btn is not None:
+            _save_btn.setObjectName("primaryButton")
         button_box.accepted.connect(self._on_save)
         button_box.rejected.connect(self.reject)
         outer.addWidget(button_box)
@@ -294,9 +303,9 @@ class SettingsDialog(QDialog):
         # shows up the moment the user picks a new storage path,
         # not just on Save.
         self._storage_restart_label = QLabel(SETTINGS_GENERAL_RESTART_REQUIRED)
-        self._storage_restart_label.setStyleSheet(
-            "color: #c08020; font-style: italic;"
-        )
+        # Gold, not amber: "needs a restart" is a heads-up, and the theme
+        # already owns exactly one colour that means look-here.
+        self._storage_restart_label.setObjectName("warningNote")
         self._storage_restart_label.setVisible(False)
         self._storage_restart_label.setWordWrap(True)
         layout.addWidget(self._storage_restart_label)
@@ -341,15 +350,13 @@ class SettingsDialog(QDialog):
         layout.addWidget(self._hotkey_edit)
 
         self._hotkey_invalid_label = QLabel(SETTINGS_HOTKEY_INVALID)
-        self._hotkey_invalid_label.setStyleSheet(
-            "color: #c04040; font-style: italic;"
-        )
+        self._hotkey_invalid_label.setObjectName("errorLabel")
         self._hotkey_invalid_label.setVisible(False)
         layout.addWidget(self._hotkey_invalid_label)
 
         note = QLabel(SETTINGS_HOTKEY_NOTE)
         note.setWordWrap(True)
-        note.setStyleSheet("color: #888; font-style: italic;")
+        note.setObjectName("noteLabel")
         layout.addWidget(note)
 
         layout.addStretch()
@@ -796,7 +803,7 @@ class SettingsDialog(QDialog):
         danger_layout = QVBoxLayout(danger_group)
         note = QLabel(SETTINGS_DATA_DANGER_NOTE)
         note.setWordWrap(True)
-        note.setStyleSheet("color: #c04040; font-style: italic;")
+        note.setObjectName("dangerNote")
         danger_layout.addWidget(note)
         danger_layout.addWidget(QLabel(SETTINGS_DATA_RESET_LABEL))
         self._reset_input = QLineEdit()
@@ -804,6 +811,8 @@ class SettingsDialog(QDialog):
         self._reset_input.textChanged.connect(self._on_reset_text_changed)
         danger_layout.addWidget(self._reset_input)
         self._reset_btn = QPushButton(SETTINGS_DATA_RESET_BUTTON)
+        # The one button in Settings that destroys data.
+        self._reset_btn.setObjectName("dangerButton")
         self._reset_btn.setEnabled(False)
         self._reset_btn.clicked.connect(self._on_reset_clicked)
         danger_layout.addWidget(self._reset_btn)
@@ -913,10 +922,11 @@ class SettingsDialog(QDialog):
 
         # The app's own name on the About page is the one display-
         # sized line in the dialog, so it takes the same theme step
-        # the dashboard greeting does. Was "current size + 8", which
-        # put it at a size nothing else in the app used.
+        # the dashboard greeting does -- but not its gold, which stays
+        # reserved for that one line. Was "current size + 8", which put
+        # it at a size nothing else in the app used.
         name_label = QLabel(SETTINGS_ABOUT_NAME)
-        name_label.setObjectName("displayLabel")
+        name_label.setObjectName("displayTitle")
         layout.addWidget(name_label)
 
         tagline = QLabel(SETTINGS_ABOUT_TAGLINE)
@@ -935,7 +945,7 @@ class SettingsDialog(QDialog):
 
         challenge = QLabel(SETTINGS_ABOUT_CHALLENGE)
         challenge.setWordWrap(True)
-        challenge.setStyleSheet("color: #888; font-style: italic;")
+        challenge.setObjectName("noteLabel")
         layout.addWidget(challenge)
 
         layout.addStretch()

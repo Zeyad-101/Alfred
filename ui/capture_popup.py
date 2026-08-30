@@ -114,6 +114,7 @@ from ui.strings import (
     CAPTURE_PLACEHOLDER,
     CAPTURE_WINDOW_TITLE,
 )
+from ui.theme import _BG_PANEL, _BORDER_STRONG
 
 
 # Visual states the popup can be in. Exposed as module-level
@@ -149,11 +150,13 @@ _SPRITE_BODY_LEFT = 53
 _SPRITE_BODY_RIGHT = 114
 _SPRITE_MOUTH_DY = 42
 
-# Bubble fill / border. These duplicate the two QSS colours for
-# ``#bubbleFrame`` because a stylesheet cannot paint the tail -- the
-# triangle has to come from ``paintEvent``, and it has to match.
-_BUBBLE_FILL = "#2a2e35"
-_BUBBLE_LINE = "#4a505a"
+# Bubble fill / border. A stylesheet cannot paint the tail -- the triangle
+# has to come from ``paintEvent`` -- so these are the two ``#bubbleFrame``
+# colours reached for directly instead of copied: the first version pasted
+# the hex literals here, which meant a repaint of the theme silently left
+# the tail a different colour from the bubble it hangs off.
+_BUBBLE_FILL = _BG_PANEL
+_BUBBLE_LINE = _BORDER_STRONG
 
 # Snippet length for the answer-result list rows. Chosen to be
 # long enough to convey what the entry is about but short
@@ -405,7 +408,7 @@ class CapturePopup(QDialog):
 
         layout = QVBoxLayout(self.bubble)
         layout.setContentsMargins(12, 12, 12, 12)
-        layout.setSpacing(6)
+        layout.setSpacing(8)
 
         self.input = QLineEdit()
         self.input.setPlaceholderText(CAPTURE_PLACEHOLDER)
