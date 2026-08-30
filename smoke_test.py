@@ -72,10 +72,28 @@ def main() -> int:
     pump(50)  # let layout settle
 
     print("[1] empty state on first launch")
-    expect("list empty on first run", win.all_list.count(), 0)
+    # Alfred lands on the Dashboard, not All Memories. That matters
+    # for every list assertion below: ``_refresh_list`` on Dashboard
+    # refreshes the dashboard's own cards and returns without ever
+    # touching ``all_list``, so "0 rows" there would be true for the
+    # wrong reason -- nobody populated it -- and would stay true no
+    # matter what we create. Assert the landing view, then switch to
+    # All Memories, which is what sections [2]-[10] actually exercise.
+    from ui.sidebar import VIEW_ALL_MEMORIES, VIEW_DASHBOARD
+    expect("landing view is the dashboard", win._current_view, VIEW_DASHBOARD)
+    expect("dashboard is the visible middle page",
+           win.middle_stack.currentIndex(), 0)
     expect("editor has no current id", win.editor.current_id, None)
     expect("delete button disabled on editor",
            win.editor.delete_btn.isEnabled(), False)
+
+    win.sidebar.select_view(VIEW_ALL_MEMORIES)
+    pump(20)
+    # Middle-pane page order is Dashboard, All Memories, Inbox, Tasks,
+    # Trash, Projects (``ui.main_window._VIEW_PAGE_INDEX``).
+    expect("all memories is now the visible middle page",
+           win.middle_stack.currentIndex(), 1)
+    expect("list empty on first run", win.all_list.count(), 0)
 
     print("[2] create via the editor flow (simulating _on_editor_save)")
     win.editor.title_input.setText("Max98357A notes")
@@ -305,7 +323,8 @@ def main() -> int:
     from core.inbox import list_inbox
     from core.inbox import create_inbox_item
     from core.tasks import list_tasks
-    from ui.main_window import VIEW_ALL_MEMORIES, VIEW_INBOX, VIEW_TASKS
+    from ui.main_window import VIEW_ALL_MEMORIES, VIEW_TASKS
+    from PySide6.QtCore import Qt
     from PySide6.QtWidgets import QDialog
 
     # Click + Inbox. Phase 8 rewired the button to open the
@@ -325,11 +344,18 @@ def main() -> int:
     expect("title derived from first line",
            list_inbox(conn)[0].title, "Pick up dry cleaning")
 
-    # Switch to Inbox view and verify the item is there.
-    win.sidebar.select_view(VIEW_INBOX)
+    # Inbox has no sidebar row any more (see ui/sidebar.py): All
+    # Memories lists every non-deleted memory whatever its type, so
+    # that is where a capture surfaces for the user now. The check is
+    # the same one it always was -- the captured item is visible in a
+    # list, and selecting it loads it into the editor with the inbox
+    # action row on -- just made against the list the user still has.
+    win.sidebar.select_view(VIEW_ALL_MEMORIES)
     pump(20)
-    expect("inbox view shows the new item", win.inbox_list.count(), 1)
-    win.inbox_list.setCurrentRow(0)
+    expect("all memories shows the new inbox item", win.all_list.count(), 1)
+    expect("the listed row is the capture",
+           win.all_list.item(0).data(Qt.UserRole), 1)
+    win.all_list.select_memory(1)
     pump(20)
     expect("editor loaded the inbox item",
            win.editor.current_id, 1)
@@ -361,7 +387,6 @@ def main() -> int:
     # Switch to Tasks view and confirm it appears in the Today bucket.
     win.sidebar.select_view(VIEW_TASKS)
     pump(20)
-    from PySide6.QtCore import Qt
     today_bucket = win.tasks_tree._bucket_items["today"]
     in_today = any(
         today_bucket.child(i).data(0, Qt.UserRole) == 1
@@ -400,17 +425,24 @@ def main() -> int:
     inbox_id = list_inbox(conn)[0].id
 
     # The new inbox item isn't selected (we're in Tasks view); switch
-    # to Inbox and select it.
-    win.sidebar.select_view(VIEW_INBOX)
+    # to All Memories -- where inbox-type rows live now -- and pick it.
+    win.sidebar.select_view(VIEW_ALL_MEMORIES)
     pump(20)
-    win.inbox_list.select_memory(inbox_id)
+    expect("all memories shows the second inbox item",
+           any(win.all_list.item(i).data(Qt.UserRole) == inbox_id
+               for i in range(win.all_list.count())), True)
+    win.all_list.select_memory(inbox_id)
     pump(20)
+    expect("editor loaded the second inbox item",
+           win.editor.current_id, inbox_id)
     win.editor.organize_btn.click()
     pump(20)
     expect("organized to note", get_memory(conn, inbox_id).type, "note")
 
-    # Verify it shows up in All Memories.
-    win.sidebar.select_view(VIEW_ALL_MEMORIES)
+    # Verify it still shows up in All Memories, now as a note. We are
+    # already on that view, so ``select_view`` would early-return
+    # without a refresh -- rebuild the list explicitly instead.
+    win._refresh_list()
     pump(20)
     organized_id = get_memory(conn, inbox_id).id
     in_all = any(
@@ -478,7 +510,7 @@ def main() -> int:
     win.sidebar.select_view(VIEW_TRASH)
     pump(20)
     expect("trash view is the active middle page",
-           win.middle_stack.currentIndex(), 3)
+           win.middle_stack.currentIndex(), 4)
     expect("trash view lists 3 items", win.trash_view.list_widget.count(), 3)
     expect("empty button enabled when trash has items",
            win.trash_view.empty_btn.isEnabled(), True)
@@ -581,6 +613,10 @@ def main() -> int:
     init_db(conn)
     win = MainWindow(conn)
     win.show()
+    pump(20)
+    # Fresh window, so we are back on the Dashboard: sections [15]-[18]
+    # drive the editor from the All Memories list, so switch first.
+    win.sidebar.select_view(VIEW_ALL_MEMORIES)
     pump(20)
 
     from ui.editor_panel import PREVIEW_TOGGLE_EDIT, PREVIEW_TOGGLE_PREVIEW
@@ -732,7 +768,7 @@ def main() -> int:
     win.sidebar.select_view(VIEW_PROJECTS)
     pump(20)
     expect("middle stack is on the projects page",
-           win.middle_stack.currentIndex(), 4)
+           win.middle_stack.currentIndex(), 5)
     expect("editor stays visible in projects view",
            win.editor.isVisible(), True)
     expect("empty projects list when none exist yet",
@@ -856,7 +892,7 @@ def main() -> int:
     win.sidebar.select_view(VIEW_ALL_MEMORIES)
     pump(20)
     expect("back on all_memories view",
-           win.middle_stack.currentIndex(), 0)
+           win.middle_stack.currentIndex(), 1)
     expect("editor still has the memory loaded",
            win.editor.current_id, target_mid)
 
@@ -1053,6 +1089,12 @@ def main() -> int:
     pump(20)
     win2 = MainWindow(conn)
     win2.show()
+    pump(20)
+    # A restarted window opens on the Dashboard, which never populates
+    # ``all_list`` -- so go to All Memories before selecting a row, or
+    # the select is a no-op against an empty list and the editor stays
+    # blank for reasons that have nothing to do with the link.
+    win2.sidebar.select_view(VIEW_ALL_MEMORIES)
     pump(20)
     # Loading the alpha memory should populate its chip list with
     # the buddy memory.
