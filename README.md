@@ -4,10 +4,10 @@
 
 # Alfred
 
-**A butler for your brain. Runs on your desktop. Zero AI inside.**
+**A butler who lives on your desktop and remembers everything you tell him. Zero AI inside.**
 
 [![Platform](https://img.shields.io/badge/platform-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/Zeyad-101/Alfred/releases)
-[![Python](https://img.shields.io/badge/built%20with-Python-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/built%20with-Python%20%2B%20PySide6-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![No AI](https://img.shields.io/badge/AI%20used-zero-black)](#why-no-ai)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
@@ -19,22 +19,26 @@
 
 ## What Alfred does
 
-Alfred is a desktop assistant that remembers things so you don't have to.
+Alfred is a floating desktop companion that captures your notes, tasks, and appointments, and hands them back the moment you ask.
 
-Tell it about an appointment, and it'll bring it back up when it matters. Tell it something worth keeping, and it files it under a project. Ask it about that project three weeks later, and it hands you back everything you've told it — notes, tasks, schedule, all of it.
+He doesn't sit in a browser tab. He's an actual sprite on your desktop — draggable, always on top — with a global hotkey that opens a one-line capture box from anywhere, on top of any app you're in.
 
-- **Notes** — write things down, Alfred keeps them
-- **Schedule & tasks** — appointments and to-dos, with reminders
-- **Projects** — group anything you tell it under a project, and query it later
-- **Memory** — ask Alfred what it knows about something, and it tells you
+- **Capture from anywhere** — hit your hotkey, type a thought or a question, hit Enter. Under a second, no window-switching.
+- **Same field, two jobs** — type "remember that..." to save something, or "what is...?" to ask. Alfred pulls a real answer from what you've already told him, no LLM involved.
+- **Notes, tasks, and projects** — write things down, group them under a project, and ask about that project weeks later — Alfred hands back everything filed under it.
+- **Understands "tomorrow" and "next friday"** — due dates parsed from plain text, entirely offline.
+- **Full-text search** across everything you've ever stored.
+- **Nothing's really deleted** — deleted items go to a trash you can restore from, not straight to the void.
+- **Export and back up** your whole database to JSON whenever you want, no lock-in.
+- **Inbox capture** — jot something down fast, organize or convert it into a task later, whenever you actually have time.
 
-It's less a chatbot and more a second brain that lives in your system tray.
+Click the companion once and the capture popup opens next to him. Double-click him and the full window opens.
 
 ## Why no AI
 
-Alfred runs on plain Python logic — no LLM calls, no API keys, no account, nothing leaving your machine. Everything it "remembers" is stored locally at `%APPDATA%\Alfred`, and it survives an uninstall/reinstall.
+Alfred runs on plain Python logic — no LLM calls, no API keys, no account, nothing leaving your machine. Everything he "remembers" lives locally in `%APPDATA%\Alfred`, and it survives an uninstall/reinstall.
 
-If you've ever wanted something that just quietly keeps track of your stuff without phoning home, that's the whole pitch.
+If you've wanted something that just quietly keeps track of your stuff without sending it anywhere, that's the whole pitch.
 
 ## Installation
 
@@ -57,14 +61,14 @@ No build step required for that. Full build/packaging instructions (PyInstaller 
 
 <img src="assets/alfred/frames/thinking/thinking_00.png" width="100" alt="Alfred thinking">
 
-He sits in your tray and thinks about your schedule so you don't have to.
+He idles quietly on your desktop, switches to a thinking pose when he's looking something up, and gives you a one-shot greeting on launch. Drag him anywhere — he remembers where you left him.
 
 ## Tech stack
 
-- **Python** for the core logic and UI
-- **PyInstaller** to package it into a single `.exe`
+- **Python + PySide6 (Qt)** for the app and the desktop companion window
+- **SQLite (with FTS5)** for storage and full-text search
+- **PyInstaller** to package everything into a single `.exe`
 - **Inno Setup** for the Windows installer
-- **pytest** for tests
 
 ## Contributing
 
