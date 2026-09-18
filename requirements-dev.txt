@@ -10,8 +10,10 @@ pyinstaller
 # Both outputs are checked in, so packaging does not need Pillow --
 # only regenerating the art does.
 Pillow
-# pytest runs the suite in `tests/` (see pytest.ini). The suite reads the
-# real screen's geometry in tests/test_bubble_from_sprite.py, so run it
-# without QT_QPA_PLATFORM=offscreen:
-#   python -m pytest
+-# pytest runs the suite in `tests/` (see pytest.ini). The suite reads the
+-# real screen's geometry in tests/test_bubble_from_sprite.py, so run it
+-# without QT_QPA_PLATFORM=offscreen:
+-#   python -m pytest
++# No automated suite right now. `smoke_test.py` is a manual launch
++# check — run it directly with `python smoke_test.py`, not pytest.
 pytest
