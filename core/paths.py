@@ -38,8 +38,7 @@ APP_NAME = "Alfred"
 
 # The dev-mode data directory is named "data" so a developer
 # running ``python main.py`` gets a predictable location
-# (``./data/alfred.db``) and the conftest fixtures can keep
-# using ``tmp_path``-based fresh dbs without colliding.
+# (``./data/alfred.db``).
 _DEV_DATA_SUBDIR = "data"
 
 
