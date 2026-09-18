@@ -56,8 +56,7 @@ way to intercept.
 If the conn is already in an open transaction when the import starts,
 the explicit ``BEGIN`` would error. In practice this never happens
 in the app -- every UI handler commits its writes before returning --
-so we don't add a runtime check. The conftest's ``conn`` fixture
-gives the import tests a fresh, transaction-free connection too.
+so we don't add a runtime check.
 
 Backup safety
 -------------
